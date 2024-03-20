@@ -5,11 +5,11 @@ async function seedDB() {
         await client.connect();
         console.log("Connected correctly to server");
 
-        const collection = client.db("reading_app_test").collection("users");
+        const collection = client.db("coffee_app_test").collection("coffee_shops");
 
         const dropCollection = await collection.drop();
 
-        const db = await client.db("reading_app_test").collection("users").insertMany([{username: "seed1", password: "seed2"}, {username: "seed2", password: "seed2"}]);
+        const db = await client.db("coffee_app_test").collection("coffee_shops").insertMany([{coffee_shop: "seed1", location: "seed2"}, {coffee_shop: "seed2", location: "seed2"}]);
 
         console.log("Database seeded! :)");
     } catch (err) {

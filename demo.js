@@ -1,81 +1,35 @@
+
+
 const { MongoClient } = require("mongodb");
 
-const uri =
-    "mongodb+srv://test-user:test-password@cluster0.lgmelut.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
-
+const uri = "mongodb+srv://test-user:test-password@cluster0.lgmelut.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
 const client = new MongoClient(uri);
 
 async function main() {
     try {
         await client.connect();
-        // await createDb(client, {
-        //     username: "testUsername",
-        //     savedCoffeeShops: []
-        // })
+        console.log("Connected correctly to server");
 
-        await createUser(client, {username: "secondUser", savedCoffeeShops:[]})
+        const collection = client.db("coffee_app_test").collection("coffee_shops");
 
-    }
-    catch (e) {
-        console.error(e)
-    } 
-    finally {
-        await client.close
-    }
-}
+        // Drop the collection if it already exists
+        const dropCollection = await collection.drop();
 
-main().catch(console.error)
+        // Seed the database with coffee shop data
+        const coffeeShops = [
+            { name: "Coffee Shop 1", longitude: "longitude 1", latitude : "latitude 1" },
+            { name: "Coffee Shop 2", longitude: "longitude 2", latitude : "latitude 2"},
+            // Add more coffee shops as needed
+        ];
 
-async function updateMovieByName(client, movieTitle, updatedMovie) {
-    const result = await client.db("sample_mflix").collection("movies").updateOne({title: movieTitle}, {$set: updatedMovie})
-    console.log(`${result.matchedCount} documents matched`)
-    console.log(`${result.modifiedCount} document was updated`)
-    console.log(result)
-}
+        const db = await client.db("coffee_app_test").collection("coffee_shops").insertMany(coffeeShops);
 
-async function findMoviesWithMinimumRuntimeandMinimumYear(client, {minimumRuntime, minimumYear, maximumNumberOfResults = Number.MAX_SAFE_INTEGER}) {
-    const cursor = client.db("sample_mflix").collection("movies").find({
-        runtime: {$gte: minimumRuntime},
-        year: {$gte: minimumYear}
-    }).sort({lastupdated: 1})
-    .limit(maximumNumberOfResults)
-
-    const results = await cursor.toArray()
-
-    console.log(`Found ${results.length} movies!`)
-    console.log(results)
-}
-
-async function findOneListingByTitle(client, titleOfMovie) {
-    const result = await client.db("sample_mflix").collection("movies").findOne({
-        title: titleOfMovie
-    })
-
-    if (result) {
-        console.log(`Found ${titleOfMovie}`)
-        console.log(result._id)
-    }
-    else {
-        console.log('nothing found')
+        console.log("Database seeded! :)");
+    } catch (err) {
+        console.log(err.stack);
+    } finally {
+        await client.close();
     }
 }
 
-async function createUser(client, newUser) {
-    const result = await client.db("coffee_app_test").collection("users").insertOne(newUser)
-    console.log(result)
-    console.log(`New listing created with id ${result.insertedId}`)
-}
-
-async function listDatabases(client) {
-    const dbList = await client.db().admin().listDatabases()
-    console.log("Databases")
-    console.log(dbList)
-}
-
-async function createDb(client, user) {
-    const db = await client.db("coffe_app_test").collection("users").insertOne(user)
-    console.log("database created!")
-    console.log(db)
-}
-
-module.exports = client
+main().catch(console.error);
